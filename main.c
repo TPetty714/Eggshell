@@ -1,8 +1,10 @@
 #include <stdio.h>
+#include <malloc.h>
+#include <string.h>
 
 #define INPUT_BUF 256
 
-typedef enum { false, true } bool;
+typedef enum { false, true }bool;
 
 void ReadUserInput();
 char* CleanInputNewLine(char*);
@@ -15,14 +17,22 @@ int main(int argc, char const *argv[])
 }
 
 
+bool ContinueInput(char* user_input){
+    if (strcmp(user_input, "exit\n") == 0){
+        return false;
+    }else{
+        return true;
+    }
+};
+
 void ReadUserInput(){
     char* user_input = malloc(sizeof(char)*INPUT_BUF);
     do{
         printf("esh$>");
         fflush(stdin);
         fgets(user_input, INPUT_BUF, stdin);
-        user_input = CleanInputNewLine(user_input);
-        ProcessUserInput();
+         user_input = CleanInputNewLine(user_input);
+        // ProcessUserInput();
     }while(ContinueInput(user_input));
     free(user_input);
 }

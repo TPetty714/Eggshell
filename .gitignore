@@ -1,3 +1,6 @@
 .vscode
 eggshell
 main.exe
+cmake-build-debug
+.idea
+
