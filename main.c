@@ -16,9 +16,15 @@ int main(int argc, char const *argv[])
     return 0;
 }
 
+char* CleanInputNewLine(char* user_input){
+    unsigned last_character = (unsigned)strlen(user_input)-1;
+    if(user_input[last_character] == '\n')
+        user_input[last_character] = '\0';
+    return user_input;
+}
 
 bool ContinueInput(char* user_input){
-    if (strcmp(user_input, "exit\n") == 0){
+    if (strcmp(user_input, "exit") == 0){
         return false;
     }else{
         return true;
