@@ -1,18 +1,20 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
+#include <unistd.h>
 
 #define INPUT_BUF 256
 
 typedef enum { false, true }bool;
 
-void ReadUserInput();
+void RunEggShellPrompt();
 char* CleanInputNewLine(char*);
 bool ContinueInput(char*);
+void ProcessUserInput(char*);
 
 int main(int argc, char const *argv[])
 {
-    ReadUserInput();
+    RunEggShellPrompt();
     return 0;
 }
 
@@ -31,14 +33,19 @@ bool ContinueInput(char* user_input){
     }
 };
 
-void ReadUserInput(){
+void ProcessUserInput(char* user_input){
+    char* args[] ={"/0"};
+    execv("ps",args);
+}
+
+void RunEggShellPrompt(){
     char* user_input = malloc(sizeof(char)*INPUT_BUF);
     do{
         printf("esh$>");
         fflush(stdin);
         fgets(user_input, INPUT_BUF, stdin);
-         user_input = CleanInputNewLine(user_input);
-        // ProcessUserInput();
+        user_input = CleanInputNewLine(user_input);
+        ProcessUserInput(user_input);
     }while(ContinueInput(user_input));
     free(user_input);
 }
