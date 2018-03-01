@@ -1,5 +1,6 @@
 #include <stdio.h>
-#include <malloc.h>
+//#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
@@ -47,9 +48,12 @@ void ProcessUserInput(char* user_input){
     char *tok = user_input;
     int arg_count = 0;
     while((tok = strtok(tok, " ")) != NULL ){
-        arguments[arg_count] = tok;
+        if(strcmp(tok,"&")!=0) {
+            arguments[arg_count] = tok;
+            arg_count++;
+        }
         tok = NULL;
-        arg_count++;
+
     }
     arguments[arg_count] = tok;
     // once the argument is tokenized based on spaces
@@ -58,19 +62,32 @@ void ProcessUserInput(char* user_input){
     if (execvp(arguments[0], arguments)< 0){
         printf("Executable not Found Error: %s\n", strerror(errno));
     }
+
 }
 
 void RunEggShellPrompt(){
 //    allocates memory to hold the user input.
 //    Then in a do while loop the shell prompt is printed,
 //
+    int status;
+    int bg;
     char* user_input = malloc(sizeof(char)*INPUT_BUF);
     do{
         printf("esh$>");
         fflush(stdin);
         fgets(user_input, INPUT_BUF, stdin);
         user_input = CleanInputNewLine(user_input);
-        ProcessUserInput(user_input);
+        bg = 0;
+        if (((user_input && *user_input && user_input[(int)strlen(user_input) - 1] == '&') ? 0 : 1) == 1)
+            bg = 1;
+        if (strcmp(user_input, "exit") == 0)
+            return;
+        if(fork() == 0)
+            ProcessUserInput(user_input);
+        else {
+            if(bg == 1)
+                wait(&status);
+        }
     }while(ContinueInput(user_input));
     free(user_input);
 }
