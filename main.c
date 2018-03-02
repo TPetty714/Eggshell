@@ -71,23 +71,25 @@ void RunEggShellPrompt(){
 //
     int status;
     int bg;
+    pid_t child_pid, wpid;
     char* user_input = malloc(sizeof(char)*INPUT_BUF);
     do{
+        bg = 0;
         printf("esh$>");
         fflush(stdin);
         fgets(user_input, INPUT_BUF, stdin);
         user_input = CleanInputNewLine(user_input);
-        bg = 0;
-        if (((user_input && *user_input && user_input[(int)strlen(user_input) - 1] == '&') ? 0 : 1) == 1)
+        if (((user_input[(int)strlen(user_input) - 1] == '&') ? 0 : 1) == 0) {
             bg = 1;
-        if (strcmp(user_input, "exit") == 0)
-            return;
-        if(fork() == 0)
-            ProcessUserInput(user_input);
-        else {
-            if(bg == 1)
-                wait(&status);
+            printf("Running in background\n");
         }
+        if (strcmp(user_input, "exit") != 0)
+            if((child_pid = fork()) == 0)
+                ProcessUserInput(user_input);
+            else {
+                if(bg == 0)
+                    while((wpid = wait(&status)) > 0);
+            }
     }while(ContinueInput(user_input));
     free(user_input);
 }
