@@ -4,7 +4,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
-
+#include <sys/types.h>
+#include <sys/wait.h>
 #define INPUT_BUF 256
 
 typedef enum { false, true }bool;
@@ -53,22 +54,19 @@ void ProcessUserInput(char* user_input){
             arg_count++;
         }
         tok = NULL;
-
     }
     arguments[arg_count] = tok;
     // once the argument is tokenized based on spaces
     // fork the process and have the parent wait.
     // child will run the command below.
     if (execvp(arguments[0], arguments)< 0){
-        printf("Executable not Found Error: %s\n", strerror(errno));
+        printf("Executable %s not Found Error: %s\n", arguments[0], strerror(errno));
     }
-
 }
 
 void RunEggShellPrompt(){
 //    allocates memory to hold the user input.
 //    Then in a do while loop the shell prompt is printed,
-//
     int status;
     int bg;
     pid_t child_pid, wpid;
@@ -76,6 +74,7 @@ void RunEggShellPrompt(){
     do{
         bg = 0;
         printf("esh$>");
+        fflush(stdout);
         fflush(stdin);
         fgets(user_input, INPUT_BUF, stdin);
         user_input = CleanInputNewLine(user_input);
@@ -83,13 +82,18 @@ void RunEggShellPrompt(){
             bg = 1;
             printf("Running in background\n");
         }
-        if (strcmp(user_input, "exit") != 0)
-            if((child_pid = fork()) == 0)
+        if (strcmp(user_input, "exit") != 0){
+            if((child_pid = fork()) == 0){
                 ProcessUserInput(user_input);
+                exit(0);
+            }
+
             else {
                 if(bg == 0)
-                    while((wpid = wait(&status)) > 0);
+                    while((wpid = wait(&status)) <= 0);
             }
+        }
+
     }while(ContinueInput(user_input));
     free(user_input);
 }
